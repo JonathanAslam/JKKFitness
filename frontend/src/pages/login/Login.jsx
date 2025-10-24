@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import '../pagestyle/FormStyle.css';
+import axios from 'axios';
 
 const Login = () => {
   // Toggle between login and signup
@@ -8,8 +9,8 @@ const Login = () => {
   // State for form values
   const [formData, setFormData] = useState({
     username: '',
-    password: '',
     email: '',
+    password: '',
   });
 
   // Handle input changes
@@ -21,10 +22,48 @@ const Login = () => {
     }));
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  // Handle user signup
+  const handleSignUp = async (e) => {
     e.preventDefault();
-    // Add your calculation logic here
+    // Add future login logic here (use same port number as .env PORT)
+    try {
+      const result = await axios.post('http://localhost:5001/api/auth/signup', formData);
+      localStorage.setItem('token', result.data.token);
+      alert('Successfully Signed Up!');
+    } catch (error) {
+      console.error('Error Creating Account:', error);
+      // show error from backend as well with alert() 
+      alert('Sign up failed. Please check your credentials.');
+    }
+
+    console.log('Form submitted:', formData);
+  };
+
+  // Handle user login
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    // grab email and password from the form state
+    const { email, password } = formData;
+
+    try {
+      // only pass email and password for login, no username needed
+      const result = await axios.post('http://localhost:5001/api/auth/login', { email, password });
+
+      // Expect the backend to return a token at result.data.token
+      if (result?.data?.token) {
+        localStorage.setItem('token', result.data.token);
+        alert('Login successful!');
+        // you could redirect here if you have routing, e.g. navigate('/app')
+      } else {
+        console.error('Unexpected login response:', result);
+        alert('Login failed: no token returned from server.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      // show error from backend as well with alert() 
+      alert('Login failed. Please check your credentials.');
+    }
+
     console.log('Form submitted:', formData);
   };
 
@@ -40,7 +79,7 @@ const Login = () => {
   };
   return (
     <div className="container">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
 
         <h3>{hasAccount ? 'Login' : 'Sign Up'}</h3>
 
@@ -53,7 +92,8 @@ const Login = () => {
       </div>
 
       <div className="form">
-        <form onSubmit={handleSubmit} noValidate>
+        {/* need to handle signup and login differently so call the function depending which form is showing */}
+        <form onSubmit={hasAccount ? handleLogin : handleSignUp} noValidate>
 
           {!hasAccount && (
             <div className="form-row">
