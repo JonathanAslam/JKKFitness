@@ -8,6 +8,8 @@ import Recipe from '../recipe/Recipe';
 import Nutrition from '../nutrition/Nutrition';
 import Login from '../login/Login';
 import api from '../../api/api' // for fetchProfile api call (api.get)
+import { Analytics } from "@vercel/analytics/next"        // vercel analytics
+
 
 
 
@@ -65,6 +67,7 @@ const AppContent = () => {
                 )}
                 {renderContent()}
             </main>
+            <Analytics/>
         </div>
     );
 }
