@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import '../pagestyle/FormStyle.css';
-import axios from 'axios';
+// import axios from 'axios';     // not needed now that we have '../../api/api' working
+import api from '../../api/api'
 
 const Login = () => {
   // Toggle between login and signup
@@ -25,13 +26,13 @@ const Login = () => {
   // Handle user signup
   const handleSignUp = async (e) => {
     e.preventDefault();
-    // Add future login logic here (use same port number as .env PORT)
+
     try {
-      const result = await axios.post('http://localhost:5001/api/auth/signup', formData);
-      localStorage.setItem('token', result.data.token);
+      const result = await api.post('/auth/signup', formData);
       alert('Successfully Signed Up!');
+
     } catch (error) {
-      console.error('Error Creating Account:', error);
+      console.error('Error Creating Account:', error);    //debug
       // show error from backend as well with alert() 
       alert('Sign up failed. Please check your credentials.');
     }
@@ -42,24 +43,28 @@ const Login = () => {
   // Handle user login
   const handleLogin = async (e) => {
     e.preventDefault();
+
     // grab email and password from the form state
     const { email, password } = formData;
 
     try {
       // only pass email and password for login, no username needed
-      const result = await axios.post('http://localhost:5001/api/auth/login', { email, password });
-
-      // Expect the backend to return a token at result.data.token
-      if (result?.data?.token) {
-        localStorage.setItem('token', result.data.token);
+      const result = await api.post('/auth/login', { email, password });
+      
+      // Expect the backend to return a user at result.data.user
+      if (result?.data?.user) {
         alert('Login successful!');
-        // you could redirect here if you have routing, e.g. navigate('/app')
+        //reload webpage to load cookie data
+        window.location.reload();
+        // we could redirect here if you have routing, e.g. navigate('/app')
+
       } else {
-        console.error('Unexpected login response:', result);
+        console.error('Unexpected login response:', result);    //debug
         alert('Login failed: no token returned from server.');
       }
+
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login error:', error);                     //debug
       // show error from backend as well with alert() 
       alert('Login failed. Please check your credentials.');
     }

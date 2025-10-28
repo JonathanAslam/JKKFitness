@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const connectedDB = require('./db/conn');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const PORT = process.env.PORT || 5050;
@@ -11,12 +12,18 @@ connectedDB();
 
 // middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL, // frontend URL, needed for cookies to work
+  credentials: true, // allow cookies for http-only cookies with jwt (more secure than local-storage)
+}));
+app.use(cookieParser());  //allows for req.cookies in our routes and middleware
 
 // routes (auth routes for login and singup from ./routes/auth.js)
 // (/api/auth) route handles signup/login.
-const authRoute = require('./routes/auth');
-app.use("/api/auth", authRoute);
+const authRoute = require('./routes/auth'); 
+const userRoute = require('./routes/user');
+app.use("/api/auth", authRoute);  //    /signup, /login, 
+app.use("/api/user", userRoute);  //    /profile
 
 // simple message when checking if backend port is running to verify
 app.get('/', (req, res) => {
