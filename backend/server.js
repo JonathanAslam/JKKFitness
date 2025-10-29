@@ -22,8 +22,10 @@ app.use(cookieParser());  //allows for req.cookies in our routes and middleware
 // (/api/auth) route handles signup/login.
 const authRoute = require('./routes/auth'); 
 const userRoute = require('./routes/user');
+const nutritionRoute = require('./routes/nutrition');
 app.use("/api/auth", authRoute);  //    /signup, /login, 
 app.use("/api/user", userRoute);  //    /profile
+app.use("/api/nutrition", nutritionRoute); //    /analyze
 
 // simple message when checking if backend port is running to verify
 app.get('/', (req, res) => {

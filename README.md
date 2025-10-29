@@ -8,3 +8,10 @@
 - Start Command: Render runs this command to start your app with each deploy.
 - - npm start --prefix backend
 
+## Nutrition API Setup
+- Nutritionix only:
+  - Set `NUTRITIONIX_APP_ID` and `NUTRITIONIX_API_KEY` in backend env.
+- Ensure `FRONTEND_URL` is set to your frontend origin (e.g., `http://localhost:5173`).
+- Frontend should have `VITE_API_URL` pointing to backend API base (e.g., `http://localhost:5050/api`).
+
+
