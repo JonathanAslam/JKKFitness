@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../pagestyle/FormStyle.css';
 import api from '../../api/api'
 
 // accept profile from AppContent.jsx
 const Calculator = () => {
-    // userData is the object returned from the users.js /profile api call, so thats what we will use to reference the ._id from users
-
     // State for form values
     const [formData, setFormData] = useState({
         units: 'metric',
@@ -14,6 +12,25 @@ const Calculator = () => {
         height: '',
         weight: ''
     });
+
+    // useEffect to load the user measurement information if a user is signed into site, populate form data
+    useEffect(() => {
+
+        const fetchPreviousData = async () => {
+            //try to load user profile data
+            try {
+                const fetchedResult = await api.get("/measurement");
+                if (fetchedResult?.data) {
+                    setFormData(prev => ({ ...prev, ...fetchedResult.data}));
+                }
+            } catch (error) {
+                return; // dont alert if no user, just ignore and do nothing
+            }
+        };
+        
+        fetchPreviousData();
+    }, []); //only want to run one time, so empty dependency array. if we want to run multiple times on change, put the value to listen to here
+
 
     // Handle input changes
     const handleChange = (e) => {
@@ -27,16 +44,15 @@ const Calculator = () => {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         // using jwt to auth users, so userId is tied to that, just return the flattened form data with ...formData so we dont have any nested json in our db
         try {
             // Spread formData to avoid nested object issues
             // submit form data and attach it with the userId so we can associate them later on
-            const userMeasurement = await api.post("/measurement", {...formData});  
+            const userMeasurement = await api.post("/measurement", { ...formData });
             console.log("Saved measurement: ", formData);      // DELETE WHEN PRODUCTION
             alert("Measurement saved successfully!");       // DELETE WHEN PRODUCTION
         } catch (error) {
-            alert ("Error while saving form data to database");
+            alert("Error while saving form data to database");
         }
         console.log('Form submitted:', formData);
     };
@@ -173,7 +189,7 @@ const Calculator = () => {
                             Calculate
                         </button>
                     </div>
-                    
+
                 </form>
             </div>
 
