@@ -39,9 +39,8 @@ router.get("/", auth, async (req , res) => {
     //try and get the user profile, return errors
     try {
         //req.user comes from the authMiddleware (decoded JWT if authenticated), check try block of authMiddleware
-        const measurements = await UserMeasurement.find({userId: req.user.id}).sort({updatedAt: -1}).limit(1); //Sorts the results by the updatedAt field descending, meaning ONLY returned item is the most recent data since we use limit(1) to return one userMeasurement
-        res.json(measurements[0] || null);
-            
+        const measurements = await UserMeasurement.findOne({userId: req.user.id}); //there is only one data entry per user since it updates the previous information
+        res.json(measurements);
     } catch (error) {
         res.status(500).send("Error fetching measurements: ", error);
     }
