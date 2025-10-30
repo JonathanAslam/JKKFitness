@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import '../pagestyle/FormStyle.css';
+import api from '../../api/api'
 
+// accept profile from AppContent.jsx
 const Calculator = () => {
+    // userData is the object returned from the users.js /profile api call, so thats what we will use to reference the ._id from users
+
     // State for form values
     const [formData, setFormData] = useState({
         units: 'metric',
@@ -21,9 +25,19 @@ const Calculator = () => {
     };
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Add your calculation logic here
+
+        // using jwt to auth users, so userId is tied to that, just return the flattened form data with ...formData so we dont have any nested json in our db
+        try {
+            // Spread formData to avoid nested object issues
+            // submit form data and attach it with the userId so we can associate them later on
+            const userMeasurement = await api.post("/measurement", {...formData});  
+            console.log("Saved measurement: ", formData);      // DELETE WHEN PRODUCTION
+            alert("Measurement saved successfully!");       // DELETE WHEN PRODUCTION
+        } catch (error) {
+            alert ("Error while saving form data to database");
+        }
         console.log('Form submitted:', formData);
     };
 

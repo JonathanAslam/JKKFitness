@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import '../pagestyle/FormStyle.css';
-// import axios from 'axios';     // not needed now that we have '../../api/api' working
 import api from '../../api/api'
 
 const Login = () => {
@@ -56,7 +55,6 @@ const Login = () => {
         alert('Login successful!');
         //reload webpage to load cookie data
         window.location.reload();
-        // we could redirect here if you have routing, e.g. navigate('/app')
 
       } else {
         console.error('Unexpected login response:', result);    //debug
