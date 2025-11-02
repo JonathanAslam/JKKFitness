@@ -17,4 +17,7 @@
 - Frontend should have `VITE_API_URL` pointing to backend API base (e.g., `http://localhost:5050/api`).
 
 .
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
