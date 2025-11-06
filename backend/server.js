@@ -25,7 +25,7 @@ const userRoute = require('./routes/user');
 const nutritionRoute = require('./routes/nutrition');
 app.use("/api/auth", authRoute);  //    /signup, /login, 
 app.use("/api/user", userRoute);  //    /profile
-app.use("/api/nutrition", nutritionRoute);
+app.use("/api/nutrition", nutritionRoute); //    /analyze
 
 // simple message when checking if backend port is running to verify
 app.get('/', (req, res) => {
