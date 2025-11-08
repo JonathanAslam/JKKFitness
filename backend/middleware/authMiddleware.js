@@ -13,8 +13,8 @@ const auth = (req, res, next) => {
     try {
         // Verify token provided
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // Add user from payload
-        req.user = decoded.userId;
+        // UPDATED: Add user from payload (req.user.id)
+        req.user = {id: decoded.userId} ; // wrap in an object instead of how it was before
         next(); // proceed to next middleware or route handler
 
     } catch (error) {

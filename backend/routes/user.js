@@ -11,8 +11,8 @@ const User = require('../models/userModels');
 router.get("/profile", auth, async (req , res) => {
     //try and get the user profile, return errors
     try {
-        //req.user comes from the authMiddleware (decoded JWT if authenticated), check try block of authMiddleware
-        const userData = await User.findById(req.user).select("-password"); //return results without the password 
+        //UPDATED: req.user.id comes from the authMiddleware (decoded JWT if authenticated), check try block of authMiddleware
+        const userData = await User.findById(req.user.id).select("-password"); //return results without the password 
         if (!userData) {
             return res.status(404).json({message: "User not found"});
         }

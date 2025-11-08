@@ -36,8 +36,10 @@ const AppContent = () => {
 
     const renderContent = () => {
         switch (currentPage) {
+
+            // for all pages, pass the fetched user profile so the pages can access the profile info such as userData._id, make sure
             case 'calculator':
-                return <Calculator />;
+                return <Calculator profile={profile}/>;
             case 'workout':
                 return <Workout />;
             case 'recipe':

@@ -1,5 +1,4 @@
 import axios from 'axios'
-
 // create a api constant which we will use instead of axios calls to ensure all the api calls to the user db through backend store the jwt with http-only methods
 
 const api = axios.create({

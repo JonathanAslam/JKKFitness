@@ -30,9 +30,8 @@ const Navbar = ({ onNavigate, currentPage }) => {
             await api.post('/auth/logout');
             setIsLoggedIn(false);
             alert('Logged out successfully!');
-            // force reload page here
+            window.location.reload(); // force reload page here to remove user data which was previously displayed
             onNavigate('login');   // Switch to login view
-            // set user isLoggedIn to false
         } catch (error) {
             alert('Error logging out: ', error);
         }

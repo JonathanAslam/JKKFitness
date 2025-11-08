@@ -42,3 +42,5 @@ node_modules
 frontend/node_modules
 backend/node_modules
 
+# Python environment (inside the ml_service folder) Just for Mac
+/ml_service/.venv
