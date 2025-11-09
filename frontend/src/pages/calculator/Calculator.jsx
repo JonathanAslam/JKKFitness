@@ -81,15 +81,6 @@ const Calculator = () => {
             bmi: newBMI ?? formData.bmi,   // update bmi, if null just keep formData.bmi
         }
 
-        // Validate required fields for ML model
-        // const requiredFields = ['age', 'sex', 'bmi', 'hypertension', 'fitnessGoal'];
-        // const missingFields = requiredFields.filter(field => !updatedFormData[field]);
-
-        // if (missingFields.length > 0) {
-        //     alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
-        //     return;
-        // }
-
         setFormData(updatedFormData);
 
         console.log("Updated formData before submit:", updatedFormData);
@@ -126,7 +117,7 @@ const Calculator = () => {
             }
         } catch (error) {
             console.error("Error:", error);
-            alert(error.message || "Error while processing your request");
+            alert("Error while processing your request. Please make sure you are logged in to use this feature.");
         }
 
         // at the end, scroll back up to top in order to see the results
