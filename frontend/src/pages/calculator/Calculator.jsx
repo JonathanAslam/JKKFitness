@@ -115,14 +115,18 @@ const Calculator = () => {
 
             // send data to flask api and store result, display results to user
             const flaskModelResult = await api.post("/ml/predict", { data: updatedFormData });
+            console.log("Flask Model Response:", flaskModelResult.data);
+            console.log("Raw response:", flaskModelResult);
 
-            if (flaskModelResult.data && flaskModelResult.data.prediction) {
+            if (flaskModelResult.data) {
+                console.log("Setting mlResponse to:", flaskModelResult.data);
                 setMlResponse(flaskModelResult.data.prediction);
             } else {
                 throw new Error("Invalid response format from prediction service");
             }
         } catch (error) {
-            alert("Error while saving form data to database");
+            console.error("Error:", error);
+            alert(error.message || "Error while processing your request");
         }
 
         // at the end, scroll back up to top in order to see the results
@@ -131,7 +135,7 @@ const Calculator = () => {
         if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
         }
-        
+
     };
 
     // Reset form to initial values
@@ -154,12 +158,53 @@ const Calculator = () => {
     return (
         <div className="calculator-page" id='scroll-point'>
             {mlResponse && (
-                <div className='container'>
+                <div className='container results-container'>
                     <h4>BMI: {formData.bmi}</h4>
-                    <div className="ml-result">
-                        <h4>Model Prediction: <p>{mlResponse.result}</p> </h4>
-                        <p>Confidence: {(mlResponse.confidence * 100).toFixed(1)}%</p>
-                    </div>
+
+                    {/* Fitness Type first as it's the overall category */}
+                    {mlResponse.fitnessType && (
+                        <div className="ml-result">
+                            <h4>Recommended Fitness Type</h4>
+                            <p className="result-text">{mlResponse.fitnessType.result}</p>
+                            <p className="confidence">Confidence: {(mlResponse.fitnessType.confidence * 100).toFixed(1)}%</p>
+                        </div>
+                    )}
+
+                    {/* Recommendation section with detailed advice */}
+                    {mlResponse.recommendation && (
+                        <div className="ml-result">
+                            <h4>Personalized Recommendations</h4>
+                            <p className="result-text">{mlResponse.recommendation.result}</p>
+                            <p className="confidence">Confidence: {(mlResponse.recommendation.confidence * 100).toFixed(1)}%</p>
+                        </div>
+                    )}
+
+                    {/* Exercise recommendations */}
+                    {mlResponse.exercises && (
+                        <div className="ml-result">
+                            <h4>Recommended Exercises</h4>
+                            <p className="result-text">{mlResponse.exercises.result}</p>
+                            <p className="confidence">Confidence: {(mlResponse.exercises.confidence * 100).toFixed(1)}%</p>
+                        </div>
+                    )}
+
+                    {/* Equipment suggestions */}
+                    {mlResponse.equipment && (
+                        <div className="ml-result">
+                            <h4>Recommended Equipment</h4>
+                            <p className="result-text">{mlResponse.equipment.result}</p>
+                            <p className="confidence">Confidence: {(mlResponse.equipment.confidence * 100).toFixed(1)}%</p>
+                        </div>
+                    )}
+
+                    {/* Diet recommendations */}
+                    {mlResponse.diet && (
+                        <div className="ml-result">
+                            <h4>Dietary Recommendations</h4>
+                            <p className="result-text">{mlResponse.diet.result}</p>
+                            <p className="confidence">Confidence: {(mlResponse.diet.confidence * 100).toFixed(1)}%</p>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -276,32 +321,6 @@ const Calculator = () => {
                             </div>
                         </div>
 
-                        {/* <div className="form-row">
-                        <label>Fitness Type</label>
-                        <div className="radio-group">
-                        <label className="radio-label">
-                        <input
-                        type="radio"
-                        name="fitnessType"
-                        value="muscular"
-                        checked={formData.fitnessType === 'muscular'}
-                        onChange={handleChange}
-                        />
-                        Muscular Fitness
-                        </label>
-                        <label className="radio-label">
-                        <input
-                        type="radio"
-                        name="fitnessType"
-                        value="cardiovascular"
-                        checked={formData.fitnessType === 'cardiovascular'}
-                        onChange={handleChange}
-                        />
-                        Cardiovascular Fitness
-                        </label>
-                        </div>
-                        </div> */}
-
                         <div className="form-row">
                             <label htmlFor="age">Age</label>
                             <input
@@ -393,7 +412,7 @@ const Calculator = () => {
                         </div>
 
                     </form>
-                    
+
                 </div>
 
             </div>
