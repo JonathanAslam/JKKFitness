@@ -3,14 +3,35 @@ const router = express.Router();
 const auth = require('../middleware/authMiddleware'); // JWT middleware for auth
 const axios = require('axios');     // cant use api from frontend here, just use axios
 
+const rawFlaskUrl = (process.env.FLASK_URL || '').trim();
+const flaskBaseUrl = rawFlaskUrl || 'http://127.0.0.1:5000';
+
+if (!rawFlaskUrl) {
+    console.warn('[mlService] FLASK_URL not set. Defaulting to http://127.0.0.1:5000');
+}
+
+const ensureFlaskConfigured = (res) => {
+    if (!flaskBaseUrl) {
+        console.error('[mlService] No Flask base URL configured.');
+        if (res) {
+            res.status(500).json({
+                message: "ML service is not configured",
+                error: "Set FLASK_URL in backend/.env or provide a fallback URL."
+            });
+        }
+        return false;
+    }
+    return true;
+};
 
 
 // create a route to ping the flask server inorder to start it up on Render deployment
 // no auth needed, want this to ping every time someone launches the website in order to keep uptime as long as possible
 router.get("/ping-server", async (req, res) => {
     try {
+        if (!ensureFlaskConfigured(res)) return;
         // default flask route, just to ping server. 
-        const flaskResponse = await axios.get(`${process.env.FLASK_URL}/flask`);
+        const flaskResponse = await axios.get(`${flaskBaseUrl}/flask`);
         res.json({
             message: "Flask server is reachable.",
             status: flaskResponse.status
@@ -20,7 +41,7 @@ router.get("/ping-server", async (req, res) => {
 
         // If Flask server is not reachable
         if (error.code === 'ECONNREFUSED') {
-            console.error('[mlService] Connection refused when contacting Flask at', process.env.FLASK_URL);
+            console.error('[mlService] Connection refused when contacting Flask at', flaskBaseUrl);
             res.status(503).json({
                 message: "ML service is not available",
                 error: "Could not connect to prediction service"
@@ -56,7 +77,9 @@ router.post("/predict", auth, async (req , res) => {
         // target the flask predict specifically from the app.py file 
         // send data to flask server, 127.0.0.1 given by flask server on app.py startup in venv
         
-        const flaskResponse = await axios.post(`${process.env.FLASK_URL}/flask-predict`, {
+        if (!ensureFlaskConfigured(res)) return;
+
+        const flaskResponse = await axios.post(`${flaskBaseUrl}/flask-predict`, {
             data: inputData
         });
 
@@ -84,7 +107,7 @@ router.post("/predict", auth, async (req , res) => {
 
         // If Flask server is not reachable
         if (error.code === 'ECONNREFUSED') {
-            console.error('[mlService] Connection refused when contacting Flask at', process.env.FLASK_URL);
+            console.error('[mlService] Connection refused when contacting Flask at', flaskBaseUrl);
             return res.status(503).json({
                 message: "ML service is not available",
                 error: "Could not connect to prediction service"

@@ -55,12 +55,22 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     font-size: 16px;
+    color: #fff;
 }
 
 .unit-label {
     color: var(--muted);
     font-size: 14px;
     min-width: 30px;
+}
+
+.height-inputs {
+    display: flex;
+    gap: 12px;
+}
+
+.height-inputs input {
+    flex: 1;
 }
 
 .form-select {
@@ -70,7 +80,12 @@
     border-radius: 6px;
     font-size: 16px;
     background: var(--background);
-    color: var(--text);
+    color: #fff;
+}
+
+.form-select option {
+    color: #000;
+    background: #fff;
 }
 
 .form-actions {
@@ -107,4 +122,387 @@
 
 .button-primary:hover {
     background: var(--primary-dark);
+}
+
+.results-panel {
+    margin-top: 24px;
+    background: var(--background);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.status-text {
+    color: var(--muted);
+    font-size: 16px;
+}
+
+.error-text {
+    color: #ff6b6b;
+    font-weight: 600;
+}
+
+.exercise-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.exercise-card {
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.exercise-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--primary);
+    color: white;
+    font-size: 12px;
+    text-transform: capitalize;
+}
+
+.exercise-meta {
+    margin: 4px 0;
+    color: var(--muted);
+}
+
+.exercise-instructions {
+    margin-top: 12px;
+    line-height: 1.5;
+    color: var(--text);
+}
+
+.combo-wrapper {
+    position: relative;
+}
+
+.combo-input {
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+.combo-arrow {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid var(--text);
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.combo-arrow.open {
+    transform: translateY(-25%) rotate(180deg);
+}
+
+.combo-options {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    background: rgba(16, 19, 26, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 5;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
+}
+
+.combo-option {
+    padding: 10px 14px;
+    cursor: pointer;
+    color: var(--text);
+    background: transparent;
+}
+
+.combo-option:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.combo-option-empty {
+    color: var(--muted);
+    cursor: default;
+}
+
+.recipe-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.recipe-card {
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.recipe-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.recipe-summary {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.recipe-meta {
+    margin-top: 6px;
+    color: var(--muted);
+}
+
+.recipe-summary-text {
+    flex: 1;
+    min-width: 220px;
+}
+
+.recipe-blurb {
+    margin-top: 10px;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.recipe-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.chip {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.recipe-body {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.recipe-image {
+    width: 220px;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.recipe-details {
+    flex: 1;
+    min-width: 240px;
+}
+
+.expand-button {
+    padding: 6px 12px;
+    font-size: 14px;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.ingredient-list h5 {
+    margin-bottom: 8px;
+}
+
+.ingredient-list ul {
+    padding-left: 20px;
+    margin: 0;
+}
+
+.ingredient-list li {
+    margin-bottom: 4px;
+}
+
+.recipe-links {
+    margin-top: 12px;
+    display: flex;
+    gap: 16px;
+}
+
+.recipe-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.recipe-links a:hover {
+    text-decoration: underline;
+}
+
+.nutrition-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.plan-panel,
+.lookup-panel {
+    flex: 1;
+    min-width: 320px;
+}
+
+.plan-panel {
+    background: var(--background);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.plan-header h4 {
+    margin-bottom: 4px;
+}
+
+.plan-header p {
+    color: var(--muted);
+    margin: 0 0 16px;
+}
+
+.plan-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.form-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.activity-options p {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.activity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+}
+
+.activity-option {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    transition: border 0.2s ease, background 0.2s ease;
+}
+
+.activity-option strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.activity-option span {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.activity-option.active {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.plan-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.plan-results {
+    margin-top: 4px;
+}
+
+.goal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.goal-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text);
+    transition: border 0.2s ease, transform 0.2s ease;
+}
+
+.goal-card.active {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.goal-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.goal-calories {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.goal-plan {
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+.lookup-panel .form {
+    margin-bottom: 20px;
+}
+
+.nutrition-card {
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.nutrition-card__title {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.nutrition-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 6px;
+    font-size: 0.95rem;
+    color: var(--muted);
 }

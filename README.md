@@ -18,8 +18,8 @@
 
 
 ## Nutrition API Setup
-- Nutritionix only:
-  - Set `NUTRITIONIX_APP_ID` and `NUTRITIONIX_API_KEY` in backend env.
+- FatSecret only:
+  - Set `FATSECRET_CLIENT_ID` and `FATSECRET_CLIENT_SECRET` in backend env.
 - Ensure `FRONTEND_URL` is set to your frontend origin (e.g., `http://localhost:5173`).
 - Frontend should have `VITE_API_URL` pointing to backend API base (e.g., `http://localhost:5050/api`).
 

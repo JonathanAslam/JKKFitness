@@ -27,7 +27,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const result = await api.post('/auth/signup', formData);
+      await api.post('/auth/signup', formData);
       alert('Successfully Signed Up!');
 
     } catch (error) {

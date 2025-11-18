@@ -198,19 +198,6 @@ const fetchFatSecretItems = async (query) => {
   return items;
 };
 
-const attemptFatSecretFallback = async (query) => {
-  if (!hasFatSecretCredentials() || !query) {
-    return null;
-  }
-  try {
-    const items = await fetchFatSecretItems(query);
-    return items.length ? items : null;
-  } catch (err) {
-    console.error('FatSecret fallback failed', err);
-    return null;
-  }
-};
-
 // POST /api/nutrition/analyze
 // Body: { query: string }
 router.post('/analyze', async (req, res) => {
@@ -220,62 +207,19 @@ router.post('/analyze', async (req, res) => {
       return res.status(400).json({ error: 'Query is required' });
     }
 
-    const nutritionixAppId = process.env.NUTRITIONIX_APP_ID;
-    const nutritionixApiKey = process.env.NUTRITIONIX_API_KEY;
-
-    if (!nutritionixAppId || !nutritionixApiKey) {
-      return res.status(500).json({ error: 'Server missing Nutritionix credentials' });
+    if (!hasFatSecretCredentials()) {
+      return res.status(500).json({ error: 'Server missing FatSecret credentials' });
     }
 
-    const nxRes = await fetch('https://trackapi.nutritionix.com/v2/natural/nutrients', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'x-app-id': nutritionixAppId,
-        'x-app-key': nutritionixApiKey,
-      },
-      body: JSON.stringify({ query }),
-    });
-
-    if (nxRes.ok) {
-      const nxData = await nxRes.json();
-      const items = Array.isArray(nxData?.foods) ? nxData.foods.map((f) => ({
-        name: f.food_name,
-        serving_size_g: f.serving_weight_grams,
-        calories: f.nf_calories,
-        protein_g: f.nf_protein,
-        carbohydrates_total_g: f.nf_total_carbohydrate,
-        sugar_g: f.nf_sugars,
-        fiber_g: f.nf_dietary_fiber,
-        fat_total_g: f.nf_total_fat,
-        fat_saturated_g: f.nf_saturated_fat,
-        sodium_mg: f.nf_sodium,
-        potassium_mg: f.nf_potassium,
-        cholesterol_mg: f.nf_cholesterol,
-      })) : [];
-      return res.json({ items, source: 'nutritionix' });
+    const items = await fetchFatSecretItems(query);
+    if (!items.length) {
+      return res.status(404).json({ error: 'No nutrition data found for that description.' });
     }
 
-    const text = await nxRes.text().catch(() => '');
-    console.error('Nutritionix upstream error', nxRes.status, text);
-
-    if (hasFatSecretCredentials()) {
-      const fallbackItems = await attemptFatSecretFallback(query);
-      if (fallbackItems) {
-        return res.json({ items: fallbackItems, source: 'fatsecret' });
-      }
-    }
-
-    return res.status(502).json({ error: 'Unable to analyze nutrition right now. Please try again later.' });
+    return res.json({ items, source: 'fatsecret' });
   } catch (err) {
     console.error('Nutrition analyze error:', err);
-    const fallbackItems = await attemptFatSecretFallback((req.body?.query || '').trim());
-    if (fallbackItems) {
-      return res.json({ items: fallbackItems, source: 'fatsecret' });
-    }
-
-    return res.status(500).json({ error: 'Unexpected server error' });
+    return res.status(502).json({ error: 'Unable to analyze nutrition right now. Please try again later.' });
   }
 });
 

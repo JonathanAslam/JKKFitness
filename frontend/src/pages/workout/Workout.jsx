@@ -1,5 +1,56 @@
 import React, { useState } from 'react'
 import '../pagestyle/FormStyle.css'
+import SearchableSelect from '../../components/SearchableSelect'
+
+const MUSCLE_OPTIONS = [
+  { label: 'Abdominals', value: 'abdominals' },
+  { label: 'Abductors', value: 'abductors' },
+  { label: 'Adductors', value: 'adductors' },
+  { label: 'Biceps', value: 'biceps' },
+  { label: 'Calves', value: 'calves' },
+  { label: 'Chest', value: 'chest' },
+  { label: 'Forearms', value: 'forearms' },
+  { label: 'Glutes', value: 'glutes' },
+  { label: 'Hamstrings', value: 'hamstrings' },
+  { label: 'Lats', value: 'lats' },
+  { label: 'Lower Back', value: 'lower_back' },
+  { label: 'Middle Back', value: 'middle_back' },
+  { label: 'Neck', value: 'neck' },
+  { label: 'Quadriceps', value: 'quadriceps' },
+  { label: 'Shoulders', value: 'shoulders' },
+  { label: 'Traps', value: 'traps' },
+  { label: 'Triceps', value: 'triceps' }
+];
+
+const EXERCISE_TYPE_OPTIONS = [
+  { label: 'Cardio', value: 'cardio' },
+  { label: 'Olympic Weightlifting', value: 'olympic_weightlifting' },
+  { label: 'Plyometrics', value: 'plyometrics' },
+  { label: 'Powerlifting', value: 'powerlifting' },
+  { label: 'Strength', value: 'strength' },
+  { label: 'Stretching', value: 'stretching' },
+  { label: 'Strongman', value: 'strongman' }
+];
+
+const DIFFICULTY_OPTIONS = [
+  { label: 'Beginner', value: 'beginner' },
+  { label: 'Intermediate', value: 'intermediate' },
+  { label: 'Expert', value: 'expert' }
+];
+
+const normalizeSelection = (options, input) => {
+  if (!input) return '';
+  const trimmed = input.trim();
+  if (!trimmed) return '';
+  const lowered = trimmed.toLowerCase();
+  const match = options.find(
+    opt =>
+      opt.value.toLowerCase() === lowered ||
+      opt.label.toLowerCase() === lowered
+  );
+  if (match) return match.value;
+  return lowered.replace(/\s+/g, '_');
+};
 
 const Workout = () => {
   // State for form values
@@ -10,6 +61,10 @@ const Workout = () => {
     exerciseType: '',
     difficulty: '',
   });
+  const [exercises, setExercises] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [hasSearched, setHasSearched] = useState(false);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -21,10 +76,57 @@ const Workout = () => {
   }
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your calculation logic here
-    console.log('Form submitted:', formData);
+    const params = new URLSearchParams();
+    if (formData.workoutName.trim()) params.append('name', formData.workoutName.trim());
+    const normalizedMuscle = normalizeSelection(MUSCLE_OPTIONS, formData.muscleGroup);
+    const normalizedType = normalizeSelection(EXERCISE_TYPE_OPTIONS, formData.exerciseType);
+    const normalizedDifficulty = normalizeSelection(DIFFICULTY_OPTIONS, formData.difficulty);
+
+    if (normalizedMuscle) params.append('muscle', normalizedMuscle);
+    if (normalizedType) params.append('type', normalizedType);
+    if (normalizedDifficulty) params.append('difficulty', normalizedDifficulty);
+
+    if (!params.toString()) {
+      setError('Enter at least one search field to find exercises.');
+      setHasSearched(false);
+      setExercises([]);
+      return;
+    }
+
+    if (!import.meta.env.VITE_API_NINJAS_KEY) {
+      setError('Missing API key. Set VITE_API_NINJAS_KEY in your frontend .env file.');
+      setHasSearched(false);
+      setExercises([]);
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setHasSearched(true);
+
+    try {
+      const response = await fetch(`https://api.api-ninjas.com/v1/exercises?${params.toString()}`, {
+        headers: {
+          'X-Api-Key': import.meta.env.VITE_API_NINJAS_KEY,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Unable to fetch exercises. Please try again.');
+      }
+
+      const data = await response.json();
+      setExercises(data);
+    } catch (err) {
+      setError(err.message || 'Unable to fetch exercises right now.');
+      setExercises([]);
+      setHasSearched(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReset = () => {
@@ -34,6 +136,9 @@ const Workout = () => {
       exerciseType: '',
       difficulty: '',
     });
+    setExercises([]);
+    setError('');
+    setHasSearched(false);
   };
 
 
@@ -58,71 +163,32 @@ const Workout = () => {
             />
           </div>
 
-          <div className='form-row'>
-            <label>Muscle Group</label>
-            <select
-              id="muscleGroup"
-              name='muscleGroup'
-              value={formData.muscleGroup}
-              onChange={handleChange}
-              className='form-select'
-            >
-              <option value="">Any</option>
-              <option value="abdominals">Abdominals</option>
-              <option value="abductors">Abductors</option>
-              <option value="adductors">Adductors</option>
-              <option value="biceps">Biceps</option>
-              <option value="calves">Calves</option>
-              <option value="chest">Chest</option>
-              <option value="forearms">Forearms</option>
-              <option value="glutes">Glutes</option>
-              <option value="hamstrings">Hamstrings</option>
-              <option value="lats">Lats</option>
-              <option value="lower_back">Lower Back</option>
-              <option value="middle_back">Middle Back</option>
-              <option value="neck">Neck</option>
-              <option value="quadriceps">Quadriceps</option>
-              <option value="shoulders">Shoulders</option>
-              <option value="traps">Traps</option>
-              <option value="triceps">Triceps</option>
-            </select>
-          </div>
+          <SearchableSelect
+            label="Muscle Group"
+            name="muscleGroup"
+            value={formData.muscleGroup}
+            options={MUSCLE_OPTIONS}
+            placeholder="Start typing a muscle..."
+            onChange={handleChange}
+          />
 
-          <div className='form-row'>
-            <label>Exercise Type</label>
-            <select
-              id="exerciseType"
-              name='exerciseType'
-              value={formData.exerciseType}
-              onChange={handleChange}
-              className='form-select'
-            >
-              <option value="">Any</option>
-              <option value="cardio">Cardio</option>
-              <option value="olympic_weightlifting">Olympic Weightlifting</option>
-              <option value="plyometrics">Plyometrics</option>
-              <option value="powerlifting">Powerlifting</option>
-              <option value="strength">Strength</option>
-              <option value="stretching">Stretching</option>
-              <option value="strongman">Strongman</option>
-            </select>
-          </div>
+          <SearchableSelect
+            label="Exercise Type"
+            name="exerciseType"
+            value={formData.exerciseType}
+            options={EXERCISE_TYPE_OPTIONS}
+            placeholder="Start typing a type..."
+            onChange={handleChange}
+          />
 
-          <div>
-            <label>Difficulty</label>
-            <select
-              id="difficulty"
-              name='difficulty'
-              value={formData.difficulty}
-              onChange={handleChange}
-              className='form-select'
-            >
-              <option value="">Any</option>
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="expert">Expert</option>
-            </select>
-          </div>
+          <SearchableSelect
+            label="Difficulty"
+            name="difficulty"
+            value={formData.difficulty}
+            options={DIFFICULTY_OPTIONS}
+            placeholder="Start typing difficulty..."
+            onChange={handleChange}
+          />
 
           <div className='form-actions'>
             <button
@@ -144,6 +210,36 @@ const Workout = () => {
 
 
         </form>
+      </div>
+
+      <div className='results-panel'>
+        {loading && <p className='status-text'>Searching for exercises...</p>}
+        {error && <p className='error-text'>{error}</p>}
+        {!loading && !error && hasSearched && exercises.length === 0 && (
+          <p className='status-text'>No exercises matched your filters.</p>
+        )}
+        {!loading && !error && exercises.length > 0 && (
+          <div className='exercise-grid'>
+            {exercises.map(exercise => (
+              <div
+                key={`${exercise.name}-${exercise.difficulty}-${exercise.type}`}
+                className='exercise-card'
+              >
+                <div className='exercise-header'>
+                  <h4>{exercise.name}</h4>
+                  <span className='badge'>{exercise.difficulty}</span>
+                </div>
+                <p className='exercise-meta'>
+                  <strong>Type:</strong> {exercise.type} &nbsp;|&nbsp; <strong>Muscle:</strong> {exercise.muscle}
+                </p>
+                <p className='exercise-meta'>
+                  <strong>Equipment:</strong> {exercise.equipment || 'None'}
+                </p>
+                <p className='exercise-instructions'>{exercise.instructions}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
