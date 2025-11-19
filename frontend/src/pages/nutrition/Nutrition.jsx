@@ -81,6 +81,30 @@ const convertWeightToLbs = (value, units = 'imperial') => {
   return units === 'metric' ? numeric * 2.20462 : numeric;
 };
 
+const convertLbsToKg = (value) => {
+  const numeric = toNumber(value);
+  if (numeric == null) return null;
+  return numeric / 2.20462;
+};
+
+const convertInchesToCm = (value) => {
+  const numeric = toNumber(value);
+  if (numeric == null) return null;
+  return numeric * 2.54;
+};
+
+const convertCmToInches = (value) => {
+  const numeric = toNumber(value);
+  if (numeric == null) return null;
+  return numeric / 2.54;
+};
+
+const formatMeasure = (value, decimals = 1) => {
+  if (value == null || Number.isNaN(value)) return '';
+  const factor = 10 ** decimals;
+  return String(Math.round(value * factor) / factor);
+};
+
 const Nutrition = () => {
   const [formData, setFormData] = useState({
     foodConsumed: ''

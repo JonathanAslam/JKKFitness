@@ -124,6 +124,13 @@
     background: var(--primary-dark);
 }
 
+.button:disabled,
+.button[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .results-panel {
     margin-top: 24px;
     background: var(--background);
@@ -440,8 +447,31 @@
     gap: 12px;
 }
 
+.wizard-actions {
+    margin-top: 16px;
+    justify-content: space-between;
+}
+
+.plan-actions--inline {
+    justify-content: flex-start;
+}
+
+.calorie-step {
+    margin-top: 4px;
+}
+
 .plan-results {
     margin-top: 4px;
+}
+
+.plan-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.plan-results--summary {
+    margin-top: 0;
 }
 
 .goal-grid {
@@ -480,6 +510,144 @@
     color: var(--muted);
     margin-top: 6px;
     line-height: 1.4;
+}
+
+.macro-focus {
+    margin-top: 12px;
+}
+
+.macro-focus-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+}
+
+.macro-focus-option {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    transition: border 0.2s ease, transform 0.2s ease;
+}
+
+.macro-focus-option strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.macro-focus-option span {
+    display: block;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.macro-focus-option small {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.85rem;
+    color: var(--primary);
+}
+
+.macro-focus-option.active {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.macro-section {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.macro-section__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.macro-section__label {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.macro-section__focus {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.macro-section__description {
+    display: block;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.macro-section__calories {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.macro-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.macro-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.macro-card__header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.macro-progress {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 6px 0 10px;
+}
+
+.macro-progress__bar {
+    height: 100%;
+    border-radius: inherit;
+    transition: width 0.3s ease;
+}
+
+.macro-progress__bar--protein {
+    background: #ff9776;
+}
+
+.macro-progress__bar--fat {
+    background: #ffd166;
+}
+
+.macro-progress__bar--carbs {
+    background: #7dd3fc;
+}
+
+.macro-card__stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.macro-section--placeholder {
+    text-align: left;
 }
 
 .lookup-panel .form {
