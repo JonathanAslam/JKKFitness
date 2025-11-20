@@ -1,105 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import '../pagestyle/FormStyle.css';
 import api from '../../api/api'
-import SearchableSelect from '../../components/SearchableSelect'
-
-const SEX_OPTIONS = [
-    { label: 'Female', value: 'female' },
-    { label: 'Male', value: 'male' }
-];
-
-const toNumber = (value) => {
-    if (typeof value === 'number') {
-        return Number.isFinite(value) ? value : null;
-    }
-    if (typeof value === 'string') {
-        const cleaned = value.replace(/[^\d.]/g, '');
-        if (!cleaned) return null;
-        const parsed = Number(cleaned);
-        return Number.isNaN(parsed) ? null : parsed;
-    }
-    return null;
-};
-
-const inchesFromStoredHeight = (rawHeight, units = 'imperial') => {
-    if (rawHeight == null) return null;
-    if (typeof rawHeight === 'string' && /ft|in|'|"/i.test(rawHeight)) {
-        const match = rawHeight.match(/(\d+)'?\s*(\d+)?/);
-        if (match) {
-            const feet = Number(match[1]) || 0;
-            const inches = Number(match[2]) || 0;
-            return feet * 12 + inches;
-        }
-    }
-    const numeric = toNumber(rawHeight);
-    if (numeric == null) return null;
-    return units === 'metric' ? numeric / 2.54 : numeric;
-};
-
-const toFeetInches = (totalInches) => {
-    if (!totalInches || Number.isNaN(totalInches)) return { feet: '', inches: '' };
-    const rounded = Math.round(totalInches);
-    const feet = Math.floor(rounded / 12);
-    const inches = rounded - feet * 12;
-    return {
-        feet: feet ? String(feet) : '',
-        inches: inches ? String(inches) : '',
-    };
-};
-
-const totalInchesFromInputs = (feetValue, inchesValue) => {
-    const feet = toNumber(feetValue);
-    const inches = toNumber(inchesValue);
-    if (feet == null && inches == null) return null;
-    return (feet ?? 0) * 12 + (inches ?? 0);
-};
-
-const convertWeightToLbs = (value, units = 'imperial') => {
-    const numeric = toNumber(value);
-    if (numeric == null) return null;
-    return units === 'metric' ? numeric * 2.20462 : numeric;
-};
-
-const convertLbsToKg = (value) => {
-    const numeric = toNumber(value);
-    if (numeric == null) return null;
-    return numeric / 2.20462;
-};
-
-const convertInchesToCm = (value) => {
-    const numeric = toNumber(value);
-    if (numeric == null) return null;
-    return numeric * 2.54;
-};
-
-const convertCmToInches = (value) => {
-    const numeric = toNumber(value);
-    if (numeric == null) return null;
-    return numeric / 2.54;
-};
-
-const formatMeasure = (value, decimals = 1) => {
-    if (value == null || Number.isNaN(value)) return '';
-    const factor = 10 ** decimals;
-    return String(Math.round(value * factor) / factor);
-};
 
 // accept profile from AppContent.jsx
 const Calculator = () => {
     // State for form values
     const [formData, setFormData] = useState({
-        units: 'imperial',
-        age: '',
+        units: '',
+        age: 0,
         sex: '',
-        heightFeet: '',
-        heightInches: '',
-        heightCm: '',
-        weightLbs: '',
-        weightKg: '',
+        height: '',
+        weight: '',
+        // new fields for ML model
         diabetes: '',
         bmi: '',
         hypertension: '',
         fitnessGoal: '',
+        // fitnessType: ''
     });
 
     const [mlResponse, setMlResponse] = useState(null);
@@ -113,30 +30,9 @@ const Calculator = () => {
             try {
                 const fetchedResult = await api.get("/measurement");
                 if (fetchedResult?.data) {
-                    const saved = fetchedResult.data;
-                    const totalInches = inchesFromStoredHeight(saved.height, saved.units);
-                    const { feet, inches } = toFeetInches(totalInches);
-                    const weightLbs = convertWeightToLbs(saved.weight, saved.units);
-                    const heightCm = saved.units === 'metric'
-                        ? toNumber(saved.height)
-                        : totalInches != null ? convertInchesToCm(totalInches) : null;
-                    const weightKg = saved.units === 'metric'
-                        ? toNumber(saved.weight)
-                        : weightLbs != null ? convertLbsToKg(weightLbs) : null;
-                    setFormData(prev => ({
-                        ...prev,
-                        units: saved.units || 'imperial',
-                        age: saved.age != null ? String(saved.age) : prev.age,
-                        sex: saved.sex || prev.sex || '',
-                        heightFeet: feet ?? '',
-                        heightInches: inches ?? '',
-                        heightCm: heightCm != null ? formatMeasure(heightCm) : '',
-                        weightLbs: weightLbs != null ? formatMeasure(weightLbs) : '',
-                        weightKg: weightKg != null ? formatMeasure(weightKg) : '',
-                    }));
+                    setFormData(prev => ({ ...prev, ...fetchedResult.data }));
                 }
             } catch (error) {
-                console.debug('No saved measurements available', error);
                 return; // dont alert if no user, just ignore and do nothing
             }
         };
@@ -145,113 +41,58 @@ const Calculator = () => {
     }, []); //only want to run one time, so empty dependency array. if we want to run multiple times on change, put the value to listen to here
 
 
-    const calculateBMI = ({ units, heightFeet, heightInches, heightCm, weightLbs, weightKg }) => {
+    const calculateBMI = ({ units, height, weight }) => {
+        const tempHeight = Number(height);
+        const tempWeight = Number(weight);
+        // check for any 0 input, non numbers, negative numbers, invalid if so
+        if (!tempHeight || !tempWeight || tempHeight <= 0 || tempWeight <= 0 || Number.isNaN(tempHeight) || Number.isNaN(tempWeight)) return null;
+
         if (units === 'imperial') {
-            const totalInches = totalInchesFromInputs(heightFeet, heightInches);
-            const pounds = toNumber(weightLbs);
-            if (!totalInches || !pounds) return null;
-            const bmi = 703 * pounds / (totalInches ** 2);
-            return Math.round(bmi * 10) / 10;
+            // Impreial formula: 703 * weight(lb) / height(in)^2
+            const tempBMI = 703 * tempWeight / (tempHeight ** 2);
+            return Math.round(tempBMI * 10) / 10; // 1 decimal place
+            // 1 decimal place
+        } else {
+            // Metric formula: weight(kg) / (heigh()^2). remember height is in cm on the form so divide by 100
+            const tempBMI = tempWeight / ((tempHeight / 100) ** 2);
+            return Math.round(tempBMI * 10) / 10; // 1 decimal place
         }
-        const cm = toNumber(heightCm);
-        const kg = toNumber(weightKg);
-        if (!cm || !kg) return null;
-        const bmi = kg / ((cm / 100) ** 2);
-        return Math.round(bmi * 10) / 10;
     };
 
     // Handle input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => {
-            if (name === 'heightFeet' || name === 'heightInches') {
-                const nextFeet = name === 'heightFeet' ? value : prev.heightFeet;
-                const nextInches = name === 'heightInches' ? value : prev.heightInches;
-                const totalInches = totalInchesFromInputs(nextFeet, nextInches);
-                const heightCm = totalInches != null ? formatMeasure(convertInchesToCm(totalInches)) : '';
-                return {
-                    ...prev,
-                    [name]: value,
-                    heightCm,
-                };
-            }
-            if (name === 'heightCm') {
-                const cmValue = toNumber(value);
-                const inchesValue = cmValue != null ? convertCmToInches(cmValue) : null;
-                const { feet, inches } = toFeetInches(inchesValue);
-                return {
-                    ...prev,
-                    heightCm: value,
-                    heightFeet: feet ?? '',
-                    heightInches: inches ?? '',
-                };
-            }
-            if (name === 'weightLbs') {
-                const kgValue = convertLbsToKg(value);
-                return {
-                    ...prev,
-                    weightLbs: value,
-                    weightKg: kgValue != null ? formatMeasure(kgValue) : '',
-                };
-            }
-            if (name === 'weightKg') {
-                const lbsValue = convertWeightToLbs(value, 'metric');
-                return {
-                    ...prev,
-                    weightKg: value,
-                    weightLbs: lbsValue != null ? formatMeasure(lbsValue) : '',
-                };
-            }
-            if (name === 'units') {
-                return {
-                    ...prev,
-                    units: value,
-                };
-            }
-            return {
-                ...prev,
-                [name]: value,
-            };
-        });
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
     };
 
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        //compute the user's bmi locally
         const newBMI = calculateBMI(formData);
 
-        const totalInches = totalInchesFromInputs(formData.heightFeet, formData.heightInches);
-        const heightValue = formData.units === 'imperial'
-            ? totalInches
-            : toNumber(formData.heightCm);
-        const weightValue = formData.units === 'imperial'
-            ? toNumber(formData.weightLbs)
-            : toNumber(formData.weightKg);
-
-        if (!heightValue || !weightValue) {
-            alert("Please provide valid height and weight before calculating.");
-            return;
-        }
-
+        // create a updated data to manage formData + the recently calcualted bmi
         const updatedFormData = {
             ...formData,
-            height: heightValue,
-            weight: weightValue,
-            bmi: newBMI ?? formData.bmi,
-        };
+            bmi: newBMI ?? formData.bmi,   // update bmi, if null just keep formData.bmi
+        }
 
-        setFormData(prev => ({ ...prev, bmi: updatedFormData.bmi }));
+        setFormData(updatedFormData);
 
         console.log("Updated formData before submit:", updatedFormData);
 
         // fix all values we want saved to payload const and then save that to db, filtering out unneeded information for mongodb
         const payload = {
-            units: formData.units,
+            units: updatedFormData.units,
             age: Number(updatedFormData.age),
             sex: updatedFormData.sex,
-            height: updatedFormData.height,
-            weight: updatedFormData.weight,
+            height: Number(updatedFormData.height),
+            weight: Number(updatedFormData.weight),
+            // we dont wanna include the rest of the values which are only for the ML model and will be saved and sent to that separately 
         }
 
         // using jwt to auth users, so userId is tied to that, just return the flattened form data with ...formData so we dont have any nested json in our db
@@ -291,18 +132,17 @@ const Calculator = () => {
     // Reset form to initial values
     const handleReset = () => {
         setFormData({
-            units: 'imperial',
-            age: '',
-            sex: '',
-            heightFeet: '',
-            heightInches: '',
-            heightCm: '',
-            weightLbs: '',
-            weightKg: '',
+            units: 'metric',
+            age: 25,
+            sex: 'female',
+            height: '',
+            weight: '',
+            // new fields for ML model
             diabetes: '',
             bmi: '',
             hypertension: '',
             fitnessGoal: '',
+            // fitnessType: ''
         });
     };
 
@@ -367,6 +207,32 @@ const Calculator = () => {
 
                 <div className="form">
                     <form onSubmit={handleSubmit} noValidate>
+
+                        <div className="form-row">
+                            <label>Units</label>
+                            <div className="radio-group">
+                                <label className="radio-label">
+                                    <input
+                                        type="radio"
+                                        name="units"
+                                        value="metric"
+                                        checked={formData.units === 'metric'}
+                                        onChange={handleChange}
+                                    />
+                                    Metric (cm, kgs)
+                                </label>
+                                <label className="radio-label">
+                                    <input
+                                        type="radio"
+                                        name="units"
+                                        value="imperial"
+                                        checked={formData.units === 'imperial'}
+                                        onChange={handleChange}
+                                    />
+                                    Imperial (in, lbs)
+                                </label>
+                            </div>
+                        </div>
 
                         <div className="form-row">
                             <label>Hypertension (High Blood Pressure)</label>
@@ -461,119 +327,61 @@ const Calculator = () => {
                             />
                         </div>
 
-                        <SearchableSelect
-                            label="Sex"
-                            name="sex"
-                            value={formData.sex}
-                            options={SEX_OPTIONS}
-                            placeholder="Select sex"
-                            onChange={handleChange}
-                        />
-
                         <div className="form-row">
-                            <label>Units</label>
-                            <div className="radio-group">
-                                <label className="radio-label">
-                                    <input
-                                        type="radio"
-                                        name="units"
-                                        value="imperial"
-                                        checked={formData.units === 'imperial'}
-                                        onChange={handleChange}
-                                    />
-                                    Imperial (ft, lb)
-                                </label>
-                                <label className="radio-label">
-                                    <input
-                                        type="radio"
-                                        name="units"
-                                        value="metric"
-                                        checked={formData.units === 'metric'}
-                                        onChange={handleChange}
-                                    />
-                                    Metric (cm, kg)
-                                </label>
-                            </div>
+                            <label htmlFor="sex">Sex</label>
+                            <select
+                                id="sex"
+                                name="sex"
+                                value={formData.sex}
+                                onChange={handleChange}
+                                className="form-select"
+                            >
+                                <option value="female">Female</option>
+                                <option value="male">Male</option>
+                            </select>
                         </div>
 
-                        {formData.units === 'imperial' ? (
-                            <div className="form-row">
-                                <label htmlFor="heightFeet">Height (ft/in)</label>
-                                <div className="height-inputs">
-                                    <input
-                                        id="heightFeet"
-                                        name="heightFeet"
-                                        type="number"
-                                        min="0"
-                                        value={formData.heightFeet}
-                                        onChange={handleChange}
-                                        className='form-select'
-                                        placeholder="Feet"
-                                        required
-                                    />
-                                    <input
-                                        id="heightInches"
-                                        name="heightInches"
-                                        type="number"
-                                        min="0"
-                                        value={formData.heightInches}
-                                        onChange={handleChange}
-                                        className='form-select'
-                                        placeholder="Inches"
-                                    />
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="form-row">
-                                <label htmlFor="heightCm">Height (cm)</label>
+                        <div className="form-row">
+                            <label htmlFor="height">Height</label>
+                            <div className="input-with-unit">
                                 <input
-                                    id="heightCm"
-                                    name="heightCm"
+                                    id="height"
+                                    name="height"
                                     type="number"
                                     min="0"
                                     step="any"
-                                    value={formData.heightCm}
+                                    value={formData.height}
                                     onChange={handleChange}
                                     className='form-select'
                                     placeholder="e.g., 172"
                                     required
                                 />
+                                <span className="unit-label">
+                                    {formData.units === 'metric' ? 'cm' : 'in'}
+                                </span>
                             </div>
-                        )}
+                        </div>
 
-                        {formData.units === 'imperial' ? (
-                            <div className="form-row">
-                                <label htmlFor="weightLbs">Weight (lb)</label>
+                        <div className="form-row">
+                            <label htmlFor="weight">Weight</label>
+                            <div className="input-with-unit">
                                 <input
-                                    id="weightLbs"
-                                    name="weightLbs"
+                                    id="weight"
+                                    name="weight"
                                     type="number"
                                     min="0"
                                     step="any"
-                                    value={formData.weightLbs}
+                                    value={formData.weight}
                                     onChange={handleChange}
                                     className='form-select'
-                                    placeholder="e.g., 155"
+                                    placeholder="e.g., 68"
                                     required
                                 />
+                                <span className="unit-label">
+                                    {formData.units === 'metric' ? 'kg' : 'lb'}
+                                </span>
                             </div>
-                        ) : (
-                            <div className="form-row">
-                                <label htmlFor="weightKg">Weight (kg)</label>
-                                <input
-                                    id="weightKg"
-                                    name="weightKg"
-                                    type="number"
-                                    min="0"
-                                    step="any"
-                                    value={formData.weightKg}
-                                    onChange={handleChange}
-                                    className='form-select'
-                                    placeholder="e.g., 70.5"
-                                    required
-                                />
-                            </div>
-                        )}
+                        </div>
 
 
                         <div className="form-actions">
@@ -604,3 +412,4 @@ const Calculator = () => {
 };
 
 export default Calculator
+
