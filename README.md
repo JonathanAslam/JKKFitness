@@ -1,4 +1,4 @@
-# FitnessApp-481
+# FitnessApp-481: https://jkkfitness.vercel.app/
 
 ## How to run locally 
 - Open Terminal 1:
