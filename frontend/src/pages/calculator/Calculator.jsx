@@ -20,6 +20,7 @@ const Calculator = () => {
     });
 
     const [mlResponse, setMlResponse] = useState(null);
+    const [loading, setLoading] = useState(false);
 
 
     // useEffect to load the user measurement information if a user is signed into site, populate form data
@@ -71,6 +72,7 @@ const Calculator = () => {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         //compute the user's bmi locally
         const newBMI = calculateBMI(formData);
@@ -118,6 +120,8 @@ const Calculator = () => {
         } catch (error) {
             console.error("Error:", error);
             alert("Error while processing your request. Please make sure you are logged in to use this feature.");
+        } finally {
+            setLoading(false);
         }
 
         // at the end, scroll back up to top in order to see the results
@@ -389,16 +393,17 @@ const Calculator = () => {
                                 type="button"
                                 onClick={handleReset}
                                 className="button button-secondary"
+                                disabled={loading}
                             >
                                 Reset
                             </button>
 
-                            {/* no onClick because we handle submit at the form definition above */}
                             <button
                                 type="submit"
                                 className="button button-primary"
+                                disabled={loading}
                             >
-                                Calculate
+                                {loading ? 'Loading...' : 'Calculate'}
                             </button>
                         </div>
 

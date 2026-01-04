@@ -13,6 +13,9 @@ const Login = () => {
     password: '',
   });
 
+  // loading state
+  const [loading, setLoading] = useState(false);
+
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,6 +28,7 @@ const Login = () => {
   // Handle user signup
   const handleSignUp = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       await api.post('/auth/signup', formData);
@@ -34,14 +38,16 @@ const Login = () => {
       console.error('Error Creating Account:', error);    //debug
       // show error from backend as well with alert() 
       alert('Sign up failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
-
     console.log('Form submitted:', formData);
   };
 
   // Handle user login
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     // grab email and password from the form state
     const { email, password } = formData;
@@ -49,7 +55,7 @@ const Login = () => {
     try {
       // only pass email and password for login, no username needed
       const result = await api.post('/auth/login', { email, password });
-      
+
       // Expect the backend to return a user at result.data.user
       if (result?.data?.user) {
         alert('Login successful!');
@@ -65,6 +71,8 @@ const Login = () => {
       console.error('Login error:', error);                     //debug
       // show error from backend as well with alert() 
       alert('Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
 
     console.log('Form submitted:', formData);
@@ -141,6 +149,7 @@ const Login = () => {
               type="button"
               onClick={handleReset}
               className="button button-secondary"
+              disabled={loading}
             >
               Reset
             </button>
@@ -148,8 +157,9 @@ const Login = () => {
             <button
               type="submit"
               className="button button-primary"
+              disabled={loading}
             >
-              {hasAccount ? 'Login' : 'Create Account'}
+              {loading ? 'Loading...' : hasAccount ? 'Login' : 'Create Account'}
             </button>
 
           </div>
